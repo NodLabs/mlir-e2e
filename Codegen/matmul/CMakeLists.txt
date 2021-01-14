@@ -8,7 +8,9 @@ function(compile_mlir mlir_prefix)
   set(OBJ ${CMAKE_BINARY_DIR}/${mlir_prefix}.o)
   add_custom_command(OUTPUT ${OBJ}
     COMMAND ${CMAKE_BINARY_DIR}/matmul-compile/matmul-compile ${CMAKE_CURRENT_LIST_DIR}/mlir/${mlir_prefix}.mlir
-    COMMAND ${CMAKE_CXX_COMPILER} -O3 ${CMAKE_CURRENT_LIST_DIR}/${mlir_prefix}.ll -c -o ${OBJ}
+    COMMAND ${CMAKE_CXX_COMPILER} -O3 ${CMAKE_CURRENT_LIST_DIR}/${mlir_prefix}.ll
+            -mllvm -enable-matrix -mllvm -matrix-allow-contract -mllvm -matrix-default-layout=row-major 
+            -c -o ${OBJ}
     WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
     DEPENDS matmul-compile
   )
@@ -50,7 +52,7 @@ foreach(MATRIX_SIZE ${MATRIX_SIZES})
     target_link_directories(${MATMUL} PRIVATE ${MKL_DIR}/lib/intel64)
     target_link_libraries(${MATMUL} PRIVATE mkl_intel_ilp64 mkl_gnu_thread mkl_core gomp)
   else()
-    target_compile_definitions(${MATMUL} PRIVATE FILE_NAME=${MATMUL}_mlir_perf.out)
+    # target_compile_definitions(${MATMUL} PRIVATE FILE_NAME=${MATMUL}_mlir_perf.out)
   endif()
   target_link_libraries(${MATMUL} PRIVATE m)
   list(APPEND ALL_TARGETS ${MATMUL})
